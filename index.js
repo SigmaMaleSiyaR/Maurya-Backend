@@ -21,6 +21,7 @@ app.get('/webhook', (req, res) => {
 
 // Dialogflow webhook endpoint
 app.post('/webhook', (req, res) => {
+    console.log("post webhook");
     // Start measuring the time for processing the request
     console.time('webhookRequestTime');
 
