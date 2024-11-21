@@ -6,8 +6,8 @@ const app = express();
 const PORT = 5000; // Backend runs on port 5000
 const logs = [];
 
-// Enable CORS to allow frontend access
-app.use(cors({ origin: 'http://localhost:3000' })); // Adjust for your frontend domain
+// Enable CORS for all origins
+app.use(cors());
 app.use(bodyParser.json());
 
 // Dialogflow webhook endpoint
