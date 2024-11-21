@@ -6,35 +6,58 @@ const app = express();
 const PORT = 5000; // Backend runs on port 5000
 const logs = [];
 
-// Enable CORS for all origins
+// Enable CORS to allow frontend access
 app.use(cors());
 app.use(bodyParser.json());
 
 // Dialogflow webhook endpoint
 app.post('/webhook', (req, res) => {
-    const userQuery = req.body.queryResult.queryText;
-    const intent = req.body.queryResult.intent.displayName;
-    const parameters = req.body.queryResult.parameters;
-    const fulfillmentText = req.body.queryResult.fulfillmentText;
+    // Start measuring the time for processing the request
+    console.time('webhookRequestTime');
 
-    // Save log data
-    logs.push({
-        userQuery,
-        intent,
-        parameters,
-        botResponse: fulfillmentText,
-    });
+    try {
+        console.info('Request received at /webhook endpoint');
+        
+        // Log request body and headers for debugging
+        console.table(req.body);  // Visualize the body in a table format
+        console.log('Request Headers:', req.headers);
 
-    console.log('Log:', { userQuery, intent, parameters, fulfillmentText });
+        const userQuery = req.body.queryResult.queryText;
+        const intent = req.body.queryResult.intent.displayName;
+        const parameters = req.body.queryResult.parameters;
+        const fulfillmentText = req.body.queryResult.fulfillmentText;
 
-    // Respond to Dialogflow
-    res.json({
-        fulfillmentText: `Received your message: "${userQuery}" for intent "${intent}".`,
-    });
+        // Log detailed data about the request
+        console.log('User Query:', userQuery);
+        console.log('Intent:', intent);
+        console.log('Parameters:', parameters);
+
+        // Save log data
+        logs.push({
+            userQuery,
+            intent,
+            parameters,
+            botResponse: fulfillmentText,
+        });
+
+        // Respond to Dialogflow
+        res.json({
+            fulfillmentText: `Received your message: "${userQuery}" for intent "${intent}".`,
+        });
+
+        console.info('Processed the webhook successfully');
+    } catch (error) {
+        console.error('Error in /webhook:', error.message);
+        res.status(500).send('Error processing webhook');
+    }
+
+    // End the time measurement for the request
+    console.timeEnd('webhookRequestTime');
 });
 
 // Logs endpoint for the frontend
 app.get('/logs', (req, res) => {
+    console.log('Fetching logs...');
     res.json(logs);
 });
 
