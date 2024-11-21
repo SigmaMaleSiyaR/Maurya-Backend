@@ -10,6 +10,15 @@ const logs = [];
 app.use(cors());
 app.use(bodyParser.json());
 
+// GET /webhook for initial access
+app.get('/webhook', (req, res) => {
+    console.log('GET request received at /webhook');
+    res.send(`
+        <h1>Webhook Server is Running</h1>
+        <p>The webhook endpoint is active and ready to receive POST requests from Dialogflow.</p>
+    `);
+});
+
 // Dialogflow webhook endpoint
 app.post('/webhook', (req, res) => {
     // Start measuring the time for processing the request
@@ -19,7 +28,7 @@ app.post('/webhook', (req, res) => {
         console.info('Request received at /webhook endpoint');
         
         // Log request body and headers for debugging
-        console.table(req.body);  // Visualize the body in a table format
+        console.table(req.body); // Visualize the body in a table format
         console.log('Request Headers:', req.headers);
 
         const userQuery = req.body.queryResult.queryText;
@@ -64,4 +73,5 @@ app.get('/logs', (req, res) => {
 // Start the backend server
 app.listen(PORT, () => {
     console.log(`Backend server running at http://localhost:${PORT}`);
+    console.log(`You can access the webhook page at http://localhost:${PORT}/webhook`);
 });
