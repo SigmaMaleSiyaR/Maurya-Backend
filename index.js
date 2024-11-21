@@ -1,34 +1,44 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000; // Backend runs on port 5000
+const logs = [];
 
-// Middleware to parse incoming JSON requests
+// Enable CORS to allow frontend access
+app.use(cors({ origin: 'http://localhost:3000' })); // Adjust for your frontend domain
 app.use(bodyParser.json());
 
 // Dialogflow webhook endpoint
 app.post('/webhook', (req, res) => {
-    // Extract user query and intent data from the request
-    const userQuery = req.body.queryResult.queryText; // User's query
-    const intent = req.body.queryResult.intent.displayName; // Intent name
-    const parameters = req.body.queryResult.parameters; // Parameters filled by entities
-    const fulfillmentText = req.body.queryResult.fulfillmentText; // Dialogflow's response text
+    const userQuery = req.body.queryResult.queryText;
+    const intent = req.body.queryResult.intent.displayName;
+    const parameters = req.body.queryResult.parameters;
+    const fulfillmentText = req.body.queryResult.fulfillmentText;
 
-    // Log the extracted data to the console
-    console.log('User Query:', userQuery);
-    console.log('Matched Intent:', intent);
-    console.log('Parameters:', parameters);
-    console.log('Dialogflow Response:', fulfillmentText);
+    // Save log data
+    logs.push({
+        userQuery,
+        intent,
+        parameters,
+        botResponse: fulfillmentText,
+    });
 
-    // Respond back to Dialogflow with the fulfillment text
+    console.log('Log:', { userQuery, intent, parameters, fulfillmentText });
+
+    // Respond to Dialogflow
     res.json({
-        fulfillmentText: `You said: "${userQuery}". This intent is: "${intent}".`,
+        fulfillmentText: `Received your message: "${userQuery}" for intent "${intent}".`,
     });
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// Logs endpoint for the frontend
+app.get('/logs', (req, res) => {
+    res.json(logs);
 });
-//just a change
+
+// Start the backend server
+app.listen(PORT, () => {
+    console.log(`Backend server running at http://localhost:${PORT}`);
+});
